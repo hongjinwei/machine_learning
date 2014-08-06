@@ -9,7 +9,9 @@ def create_dataset():
 #example
 #inX = [2.3,34,23]
 #dataset = array([[1,2,3],[2,3,4],[4,5,6]])
-#lables = ["atype","btype","atype"]
+#labels = ["atype","btype","atype"]
+#return label
+#when you use clssify function, you should normalize the dataSet and don't forget the vector inX 
 def classify(inX,dataSet,labels,k):
     dataSetSize = dataSet.shape[0]
     
@@ -36,8 +38,8 @@ def classify(inX,dataSet,labels,k):
 
 def file2matrix(filename):
     fr = open(filename)
-    arrayOLines = fr.readlines()
-    numberOfLines = len(arrayOLines)
+    arrayOfLines = fr.readlines()
+    numberOfLines = len(arrayOfLines)
     returnMat = zeros((numberOfLines, 3)) #return a new m*n zero matrix
     classLabelVector = []
     index = 0
@@ -50,3 +52,59 @@ def file2matrix(filename):
 
     return returnMat,classLabelVector
     
+#normalizing numeric value
+#because of the value is strongly affect the distance although they are as important as others
+#newValue = (oldValue - min )/( max - min)
+def autoNorm(dataSet):
+    minVals = dataSet.min(0)
+    maxVals = dataSet.max(0)
+    ranges = maxVals - minVals
+    normDataSet = zeros(shape(dataSet))
+    m = dataSet.shape[0]
+    normDataSet = dataSet - tile(minVals, (m, 1))
+    normDataSet = normDataSet / tile(ranges, (m, 1))
+    return normDataSet, ranges, minVals
+    
+def classTest(filename):
+    hoRatio = 0.10
+    dataMat, labels = file2matrix(filename)
+    normMat, ranges, minVals = autoNorm(dataMat)
+    lines = normMat.shape[0] 
+    errorCount = 0.0
+    numTestVectors = int(lines * hoRatio)
+    for i in range(numTestVectors):
+        classifyResult = classfiy(normMat[i,:], normMat[numTestVectors:m,:], labels, 3)
+        print "the classifier came back with: %d, the real answer is: %d" % (classifyResult,labels[i])
+        
+        if (classifyResult != labels[i]):
+            errorCount += 1.0
+
+    print "the total error is %d and the fault rate is %f" %(errorCount, errorCount/(lines-numTestVectors))
+
+def img2vector(filename):
+    rteurnVector = zeros((1,1024))
+    fr = open(filename)
+    for i in range(32):
+        lineStr = fr.readline()
+        for j in range(32):
+            returnVector[0,i*32+j] = int(lineStr)
+    return returnVector
+
+def classifyHandler(filename):
+    resultList = ['Not at all','In little dose','In large dose']
+    index = 0
+    argList = []
+    argList[index] = float(raw_input("percentage of first argument: "))
+    index = index + 1
+    argList[index] = float(raw_input("percentage of first argument: "))
+    index = index + 1
+    argList[index] = float(raw_input("percentage of first argument: "))
+    index = index + 1
+    
+    inX = array([argList[0], argList[1], argList[2]])
+    dataMat, labels = file2matrix(filename)
+    normMat, ranges, minVals = autoNorm(dataMat)
+    classifyResult = classfiy((inX-minVals)/ranges, normMat, labels, 3)
+    return classifyResult 
+
+
