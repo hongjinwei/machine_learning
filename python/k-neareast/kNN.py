@@ -1,5 +1,6 @@
 from numpy import *
 import operator
+import os as os
 
 def create_dataset():
     group = array([[1.0,1.1],[1.0,1.0],[0, 0],[0,0.1]])
@@ -108,3 +109,29 @@ def classifyHandler(filename):
     return classifyResult 
 
 
+def handwritingClassTest():
+    hwLabels = []
+    trainingFileList = os.listdir('PATH')
+    trainingMat = zeros([1,1024])
+    m = len(trainingFileList)
+    for i in range(m):
+        fileNameStr = trainingFileList[i]
+        fileStr = fileNameStr.split('.')
+        trainingMat[i,:] = img2vector('PATH/TO/%s'%(fileNameStr))
+        numStr = fileStr.split('_')[1]
+        hwLabels.append(numStr)
+
+    testFileList = os.listdir("PATH")
+    errorCount = 0.0
+    mTest = len(testFileList)
+    for i in range(mTest):
+        fileNameStr = testFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        numStr = fileStr.split("-")[0]
+        testVector = img2vector('PATH/TO/%s' %(fileStr))
+        classifyResult = classify(testVector, trainingMat, hwLabels, 3)
+        if classifyResult != hwLabels[i]:
+            errorCount += 1.0
+
+    print "\nthe total number of errors is: %d "% errorCount
+    print "\nthe total error rate is: %f"%(errorCount/float(mTest))
